@@ -113,14 +113,14 @@ figcaption b{color:var(--ink-soft)}
 .teaser-wrap{max-width:960px;margin:0 auto;padding:0 24px}
 .teaser-wrap .fig img{border:1px solid var(--line);box-shadow:0 10px 40px rgba(20,24,40,.10)}
 
-/* hero overview (intro) video — first thing on the page */
+/* hero overview (intro) video - first thing on the page */
 .hero-overview{max-width:900px;margin:38px auto 0;padding:0 24px}
 .hero-overview .vcard{box-shadow:0 18px 48px rgba(15,23,42,.16)}
 .hero-overview video{width:100%;height:auto;display:block;background:#000}
 .hero-overview .cap{justify-content:center;font-size:14px}
 .hero-divider{max-width:900px;margin:28px auto 0;padding:0 24px;text-align:center;color:var(--muted);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
 
-/* hero teaser videos — side by side, kept near native size to stay crisp */
+/* hero teaser videos - side by side, kept near native size to stay crisp */
 .hero-duo{max-width:860px;margin:18px auto 0;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:760px){.hero-duo{grid-template-columns:1fr;max-width:440px}}
 .hero-duo .vcard{box-shadow:0 10px 30px rgba(15,23,42,.10)}
@@ -138,7 +138,7 @@ figcaption b{color:var(--ink-soft)}
 .herovid .cap .chip{background:rgba(157,180,255,.22);color:#dde6ff}
 
 /* metrics row */
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:880px;margin:34px auto 6px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:880px;margin:34px auto 6px}
 .metric{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px 16px;text-align:center}
 section:nth-of-type(even) .metric{background:#fff}
 .metric .num{font-family:"Newsreader",serif;font-weight:600;font-size:34px;color:var(--accent);line-height:1}
@@ -312,7 +312,7 @@ section[id]{scroll-margin-top:70px}
     </p>
     <p class="affil"><sup>*</sup>Equal contribution</p>
 
-    <p class="venue"><span class="pill">ICML 2026 F2S Workshop — Long-Horizon Video Generation</span></p>
+    <p class="venue"><span class="pill">ICML 2026 F2S Workshop on Long-Horizon Video Generation</span></p>
 
 
     <div class="btns">
@@ -337,14 +337,14 @@ section[id]{scroll-margin-top:70px}
 <div class="hero-duo">
   <div class="vcard">
     <video class="playonce" src="static/videos/hero_pi05_success_freeze.mp4" poster="static/images/hero_pi05_first.jpg" autoplay muted playsinline preload="auto"></video>
-    <div class="cap"><span style="font-weight:600">π₀.₅</span> — RoboWorld (left) vs. Real (right)</div>
+    <div class="cap"><span style="font-weight:600">π₀.₅</span>: RoboWorld (left) vs. Real (right)</div>
   </div>
   <div class="vcard">
     <video class="playonce" src="static/videos/hero_pgfast_fail_freeze.mp4" poster="static/images/hero_pgfast_first.jpg" autoplay muted playsinline preload="auto"></video>
-    <div class="cap"><span style="font-weight:600">PaliGemma&nbsp;Fast</span> — RoboWorld (left) vs. Real (right)</div>
+    <div class="cap"><span style="font-weight:600">PaliGemma&nbsp;Fast</span>: RoboWorld (left) vs. Real (right)</div>
   </div>
 </div>
-<p class="hero-duo-note"><b>Same task, different outcome.</b> From one shared initial frame, each rollout plays until its result and freezes — π₀.₅ succeeds while PaliGemma&nbsp;Fast fails, and RoboWorld reproduces both, matching the real environment.</p>
+<p class="hero-duo-note"><b>Same task, different outcome.</b> From one shared initial frame, each rollout plays until its result and freezes. π₀.₅ succeeds while PaliGemma&nbsp;Fast fails, and RoboWorld reproduces both, matching the real environment.</p>
 
 <!-- ============ ABSTRACT ============ -->
 <section style="background:#fff" id="abstract">
@@ -358,7 +358,6 @@ section[id]{scroll-margin-top:70px}
       <div class="metric"><div class="num">0.989</div><div class="lab">Pearson <i>r</i> vs. RoboArena</div></div>
       <div class="metric"><div class="num">0.970</div><div class="lab">Spearman <i>ρ</i> vs. RoboArena</div></div>
       <div class="metric"><div class="num">15.3</div><div class="lab">FPS rollout (4-step)</div></div>
-      <div class="metric"><div class="num">100</div><div class="lab">H100 GPU-hours / benchmark</div></div>
     </div>
   </div>
 </section>
@@ -377,12 +376,12 @@ section[id]{scroll-margin-top:70px}
       <div class="card">
         <div class="n">02</div>
         <h4>Fast autoregressive world model</h4>
-        <p>A pretrained video diffusion model adapted with frame-causal attention, action cross-attention, and KV-caching — enabling reliable 4-step long-horizon closed-loop rollouts at 15.3 FPS.</p>
+        <p>A pretrained video diffusion model adapted with frame-causal attention, action cross-attention, and KV-caching, enabling reliable 4-step long-horizon open-loop rollouts at 15.3 FPS.</p>
       </div>
       <div class="card">
         <div class="n">03</div>
         <h4>Task-progress VLM judge</h4>
-        <p>A 0–5 rubric that isolates world-model error to the wrist view while scoring real task progress from fixed external views — fairly crediting policies under imperfect rollouts, unlike binary success.</p>
+        <p>A 0–5 rubric that isolates world-model error to the wrist view while scoring real task progress from fixed external views, fairly crediting policies under imperfect rollouts, unlike binary success.</p>
       </div>
     </div>
   </div>
@@ -395,7 +394,7 @@ section[id]{scroll-margin-top:70px}
     <h2>Step Forcing</h2>
     <div class="narrow">
       <p>Autoregressive world models suffer a <b>train–test context mismatch</b>: training conditions on clean or noised ground-truth contexts (Teacher / Diffusion Forcing), whereas inference conditions on the model's own generations, so errors accumulate. Training directly on self-generated contexts (Self Forcing) fixes drift but is expensive and weakens action following, because the same action is supervised from model-induced rather than data-grounded states.</p>
-      <p><b>Step Forcing</b> trains the model to denoise from a <b>one-step self-forwarded prior</b> under a fixed discrete schedule — aligning training with inference and enabling efficient few-step (e.g. 4-step) denoising — while a probabilistic <b>anchor step</b> falls back to the data-grounded latent to preserve action–observation dynamics.</p>
+      <p><b>Step Forcing</b> trains the model to denoise from a <b>one-step self-forwarded prior</b> under a fixed discrete schedule, which aligns training with inference and enables efficient few-step (e.g., 4-step) denoising, while a probabilistic <b>anchor step</b> falls back to the data-grounded latent to preserve action–observation dynamics.</p>
     </div>
     <figure class="fig bordered">
       <img src="static/images/stepforcing.png" alt="Step Forcing schematic" />
@@ -410,11 +409,11 @@ section[id]{scroll-margin-top:70px}
     <p class="kicker">Diagnostic study</p>
     <h2>Controllability meets long-horizon stability</h2>
     <div class="narrow">
-      <p>On BAIR Robot Pushing, Step Forcing preserves action controllability while staying visually sharp over the whole horizon — achieving the best SSIM and LPIPS on both in-horizon (ID) and extrapolation (OOD) frames, using only 4 denoising steps where baselines use 8.</p>
+      <p>On BAIR Robot Pushing, Step Forcing preserves action controllability while staying visually sharp over the whole horizon, achieving the best SSIM and LPIPS on both in-horizon (ID) and extrapolation (OOD) frames.</p>
     </div>
     <figure class="fig bordered">
       <video class="bair-video" src="static/videos/bair_robot_pushing/clip54_idx112.mp4" poster="static/images/bair_clip54_idx112_poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
-      <figcaption><b>Long-horizon action-conditioned rollout on BAIR.</b> Each column is the same action sequence rolled out by a different method, played frame-by-frame. Teacher / Diffusion Forcing drift and blur over time; Resampling and Self Forcing stay plausible but follow actions loosely. Step Forcing (ours) stays aligned and crisp through <i>t</i>=29.</figcaption>
+      <figcaption><b>Long-horizon action-conditioned rollout on BAIR.</b> Each column is the same action sequence rolled out by a different method, played frame-by-frame. The decisive axis is <b>action followability</b>: Teacher and Diffusion Forcing drift and blur over time, while Resampling and Self Forcing stay visually plausible yet follow the commanded actions only loosely. Step Forcing (ours) keeps the rollout tightly aligned to the input actions through <i>t</i>=29.</figcaption>
     </figure>
     <div class="bair-more">
       <figure class="fig bordered" style="margin:18px auto">
@@ -434,11 +433,11 @@ section[id]{scroll-margin-top:70px}
     <p class="kicker">Efficiency</p>
     <h2>Best quality at the highest throughput</h2>
     <div class="narrow">
-      <p>On long-horizon RoboArena trajectories (300 frames / 20 s), we sweep baseline denoising steps over {50, 32, 16, 8, 4}. Because Step Forcing shares its schedule between training and inference, it runs at its 4-step setting — reaching <b>15.3 FPS</b> versus 5.7 FPS for bidirectional baselines that cannot reuse KV-cache.</p>
+      <p>On long-horizon RoboArena trajectories (300 frames / 20 s), we sweep baseline denoising steps over {50, 32, 16, 8, 4}. Because Step Forcing shares its schedule between training and inference, it runs at its 4-step setting, reaching <b>15.3 FPS</b> versus 5.7 FPS for bidirectional baselines that cannot reuse KV-cache.</p>
     </div>
     <figure class="fig bordered">
       <img src="static/images/efficiency.png" alt="Quality vs FPS" />
-      <figcaption><b>Generation quality (SSIM, LPIPS, FVD) vs. inference FPS.</b> Step Forcing (★) achieves the best LPIPS overall and the best SSIM/FVD among 4-step methods — a substantially better speed–quality tradeoff for large-scale evaluation.</figcaption>
+      <figcaption><b>Generation quality (SSIM, LPIPS, FVD) vs. inference FPS.</b> Step Forcing (★) achieves the best LPIPS overall and the best SSIM/FVD among 4-step methods, a substantially better speed–quality tradeoff for large-scale evaluation.</figcaption>
     </figure>
   </div>
 </section>
@@ -449,7 +448,7 @@ section[id]{scroll-margin-top:70px}
     <p class="kicker">Main result</p>
     <h2>Strong agreement with real-world evaluation</h2>
     <div class="narrow">
-      <p>We train the world model on <b>DROID</b> and test it well beyond its training environments by replaying <b>RoboArena</b> evaluation episodes inside RoboWorld — sharing only the initial frame. Across 8 open-sourced policies and 4,186 rollouts, RoboWorld's rankings match the real-world leaderboard with <b>Pearson r = 0.989</b> and <b>Spearman ρ = 0.970</b>, while replicating the benchmark in only ~100 H100 GPU-hours.</p>
+      <p>We train the world model on <b>DROID</b> and test it well beyond its training environments by replaying <b>RoboArena</b> evaluation episodes inside RoboWorld, sharing only the initial frame. Across 8 open-sourced policies and 4,186 rollouts, RoboWorld's rankings match the real-world leaderboard with <b>Pearson r = 0.989</b> and <b>Spearman ρ = 0.970</b>.</p>
     </div>
     <figure class="fig bordered">
       <img src="static/images/correlation.png" alt="Correlation with RoboArena" />
@@ -484,7 +483,7 @@ section[id]{scroll-margin-top:70px}
     <p class="kicker">Ablations</p>
     <h2>Both ingredients matter</h2>
     <div class="narrow">
-      <p>On the challenging, fast-moving wrist view, removing the self-forwarded prior or the anchor step both increase FVD, and dropping schedule alignment hurts most — confirming that aligned few-step denoising plus data-grounded anchors are what keep 4-step autoregressive rollouts stable. Replacing the task-progress rubric with binary success drops Spearman correlation from 0.970 to 0.922.</p>
+      <p>On the challenging, fast-moving wrist view, removing the self-forwarded prior or the anchor step both increase FVD, and dropping schedule alignment hurts most, confirming that aligned few-step denoising plus data-grounded anchors are what keep 4-step autoregressive rollouts stable. Replacing the task-progress rubric with binary success drops Spearman correlation from 0.970 to 0.922.</p>
     </div>
     <figure class="fig" style="max-width:680px">
       <img src="static/images/ablation.png" alt="Component ablation" style="border:1px solid var(--line);border-radius:12px;background:#fff" />
@@ -499,8 +498,8 @@ section[id]{scroll-margin-top:70px}
     <p class="kicker">Beyond the lab</p>
     <div class="feat-hero">
       <div>
-        <h2>Evaluate anywhere — even places<br/>no robot can safely go</h2>
-        <p class="lead">RoboWorld turns a single real frame into an entire interactive environment. We transform RoboArena scenes into <b>eight extreme settings</b> and run full closed-loop policy evaluation inside them — with <b>no physical access, no simulator engineering, and no asset creation</b>.</p>
+        <h2>Evaluate anywhere, even places<br/>no robot can safely go</h2>
+        <p class="lead">RoboWorld turns a single real frame into an entire interactive environment. We transform RoboArena scenes into <b>eight extreme settings</b> and run full closed-loop policy evaluation inside them, with <b>no physical access, no simulator engineering, and no asset creation</b>.</p>
         <div class="envchips">
           <span class="envchip">✈️ Airplane cabin</span>
           <span class="envchip">🚀 Spacecraft interior</span>
@@ -514,7 +513,7 @@ section[id]{scroll-margin-top:70px}
       </div>
       <div class="feat-stat">
         <div class="big">0.970</div>
-        <div class="lab">Pearson <i>r</i> with the real-world leaderboard — <b style="color:#fff">retained even in synthetic extreme environments</b></div>
+        <div class="lab">Pearson <i>r</i> with the real-world leaderboard, <b style="color:#fff">retained even in synthetic extreme environments</b></div>
         <div class="sub">746 valid initial conditions · 175 source frames</div>
       </div>
     </div>
