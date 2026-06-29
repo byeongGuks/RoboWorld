@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RoboWorld: Fast and Reliable Neural Simulators for Generalist Robot Policy Evaluation</title>
+<meta name="description" content="RoboWorld pairs a fast autoregressive video world model (trained with Step Forcing) with a task-progress-aware VLM judge to evaluate generalist robot policies, achieving Pearson r=0.989 with real-world evaluation." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#ffffff;
+  --bg-soft:#f8fafc;
+  --ink:#0f172a;
+  --ink-soft:#334155;
+  --muted:#64748b;
+  --line:#e2e8f0;
+  --accent:#2563eb;
+  --accent-red:#dc2626;
+  --accent-2:#0e9aa7;
+  --accent-soft:#eff4ff;
+  --radius:12px;
+  --maxw:1100px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  line-height:1.65;-webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.narrow{max-width:780px;margin:0 auto}
+
+/* ---------- Hero ---------- */
+header.hero{
+  position:relative;overflow:hidden;
+  background:
+    radial-gradient(900px 380px at 18% -10%, #eaf0ff 0%, rgba(234,240,255,0) 60%),
+    radial-gradient(760px 360px at 88% 0%, #e6fbfb 0%, rgba(230,251,251,0) 55%),
+    var(--bg);
+  border-bottom:1px solid var(--line);
+  padding:64px 0 40px;
+}
+.eyebrow{
+  display:inline-block;letter-spacing:.14em;text-transform:uppercase;
+  font-size:12.5px;font-weight:700;color:var(--accent);
+  background:var(--accent-soft);padding:6px 14px;border-radius:999px;margin-bottom:22px;
+}
+h1.title{
+  font-family:"Newsreader",Georgia,serif;
+  font-weight:600;font-size:clamp(34px,5.2vw,58px);line-height:1.08;
+  letter-spacing:-.01em;margin:0 0 10px;text-align:center;
+}
+h1.title .brand{
+  background:linear-gradient(95deg,var(--accent),var(--accent-2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.subtitle{
+  text-align:center;color:var(--ink-soft);font-size:clamp(16px,2.2vw,21px);
+  font-weight:500;max-width:760px;margin:0 auto 26px;
+}
+.authors{text-align:center;font-size:18px;color:var(--ink);margin:8px 0 4px;font-weight:500}
+.authors a{color:var(--ink)}
+.authors sup{color:var(--accent);font-weight:700}
+.affil{text-align:center;color:var(--muted);font-size:15px;margin:0 0 6px}
+.venue{text-align:center;font-size:15px;color:var(--ink-soft);margin:14px 0 4px;font-weight:600}
+.venue .pill{background:#fff;border:1px solid var(--line);padding:4px 12px;border-radius:999px}
+
+.btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:28px 0 6px}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  background:var(--ink);color:#fff;padding:11px 20px;border-radius:999px;
+  font-weight:600;font-size:15px;border:1px solid var(--ink);transition:transform .12s ease,box-shadow .12s ease,background .12s;
+}
+.btn:hover{text-decoration:none;transform:translateY(-2px);box-shadow:0 8px 22px rgba(20,24,40,.16)}
+.btn.ghost{background:#fff;color:var(--ink)}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn.soon{background:#fff;color:var(--muted);border-color:var(--line);cursor:default}
+.btn.soon:hover{transform:none;box-shadow:none}
+.btn .ic{width:17px;height:17px;display:inline-block}
+.tag-soon{font-size:11px;background:var(--accent-soft);color:var(--accent);padding:1px 7px;border-radius:999px;font-weight:700}
+
+/* ---------- Sections ---------- */
+section{padding:58px 0}
+section:nth-of-type(even){background:var(--bg-soft)}
+.kicker{
+  text-align:center;color:var(--accent);font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;font-size:13px;margin:0 0 8px;
+}
+h2{
+  font-family:"Newsreader",Georgia,serif;font-weight:600;
+  font-size:clamp(26px,3.4vw,38px);text-align:center;margin:0 0 26px;letter-spacing:-.01em;
+}
+h3{font-size:20px;font-weight:700;margin:34px 0 10px}
+p{color:var(--ink-soft);font-size:17px}
+.lead{font-size:18.5px;color:var(--ink)}
+
+figure{margin:0}
+.fig{margin:26px auto;text-align:center}
+.fig img{max-width:100%;height:auto;border-radius:12px}
+.fig.bordered img{border:1px solid var(--line);box-shadow:0 6px 24px rgba(20,24,40,.06);background:#fff}
+figcaption{color:var(--muted);font-size:14.5px;margin-top:14px;max-width:840px;margin-left:auto;margin-right:auto;text-align:center;line-height:1.55}
+figcaption b{color:var(--ink-soft)}
+.fig.bordered video.bair-video{max-width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 24px rgba(20,24,40,.06);background:#fff}
+.bair-more{max-width:960px;margin:8px auto 0}
+.bair-more-cap{color:var(--muted);font-size:13.5px;text-align:center;margin:6px auto 0;max-width:840px}
+
+/* teaser */
+.teaser-wrap{max-width:960px;margin:0 auto;padding:0 24px}
+.teaser-wrap .fig img{border:1px solid var(--line);box-shadow:0 10px 40px rgba(20,24,40,.10)}
+
+/* hero overview (intro) video — first thing on the page */
+.hero-overview{max-width:900px;margin:38px auto 0;padding:0 24px}
+.hero-overview .vcard{box-shadow:0 18px 48px rgba(15,23,42,.16)}
+.hero-overview video{width:100%;height:auto;display:block;background:#000}
+.hero-overview .cap{justify-content:center;font-size:14px}
+.hero-divider{max-width:900px;margin:28px auto 0;padding:0 24px;text-align:center;color:var(--muted);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+
+/* hero teaser videos — side by side, kept near native size to stay crisp */
+.hero-duo{max-width:860px;margin:18px auto 0;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.hero-duo{grid-template-columns:1fr;max-width:440px}}
+.hero-duo .vcard{box-shadow:0 10px 30px rgba(15,23,42,.10)}
+.hero-duo .cap{font-size:13px;gap:7px}
+.hero-duo-note{max-width:780px;margin:16px auto 0;padding:0 24px;text-align:center;color:var(--muted);font-size:15px}
+.hero-duo-note b{color:var(--ink-soft)}
+
+/* hero teaser video (legacy single) */
+.herovid-wrap{max-width:940px;margin:34px auto 0;padding:0 24px}
+.herovid{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:0 22px 60px rgba(20,24,40,.18);background:#000}
+.herovid video{display:block;width:100%;height:auto;background:#000}
+.herovid .cap{position:absolute;left:0;right:0;bottom:0;padding:34px 20px 14px;
+  background:linear-gradient(to top,rgba(8,10,16,.82),rgba(8,10,16,0));
+  color:#eef1f8;font-size:14.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.herovid .cap .chip{background:rgba(157,180,255,.22);color:#dde6ff}
+
+/* metrics row */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:880px;margin:34px auto 6px}
+.metric{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px 16px;text-align:center}
+section:nth-of-type(even) .metric{background:#fff}
+.metric .num{font-family:"Newsreader",serif;font-weight:600;font-size:34px;color:var(--accent);line-height:1}
+.metric .lab{color:var(--ink-soft);font-size:13.5px;margin-top:8px;font-weight:500}
+@media(max-width:720px){.metrics{grid-template-columns:repeat(2,1fr)}}
+
+/* video grids */
+.vgrid{display:grid;gap:18px;margin:26px 0 6px}
+.vgrid.two{grid-template-columns:repeat(2,1fr)}
+.vgrid.three{grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.vgrid.two,.vgrid.three{grid-template-columns:1fr}}
+.vcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(20,24,40,.05)}
+.vcard video{display:block;width:100%;height:auto;background:#000}
+.vcard .cap{padding:11px 14px;font-size:14px;color:var(--ink-soft);font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.chip.alt{background:#e6fbfb;color:var(--accent-2)}
+
+.bignote{
+  background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);
+  border-radius:12px;padding:18px 22px;margin:24px auto;max-width:840px;font-size:16.5px;color:var(--ink-soft);
+}
+.bignote b{color:var(--ink)}
+
+/* contributions */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:30px 0 0}
+@media(max-width:820px){.cards{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.card .n{font-family:"Newsreader",serif;font-size:22px;color:var(--accent);font-weight:600}
+.card h4{margin:8px 0 8px;font-size:18px}
+.card p{font-size:15px;margin:0}
+
+/* bibtex */
+.bibtex{background:#15171c;color:#e7eaf0;border-radius:14px;padding:22px 24px;overflow:auto}
+.bibtex pre{margin:0;font-family:"JetBrains Mono",monospace;font-size:13.5px;line-height:1.7;white-space:pre}
+.bibtex .k{color:#7aa2ff}.bibtex .s{color:#86e1a9}
+
+/* ---------- Feature band: synthetic environments ---------- */
+section.feature{
+  background:
+    radial-gradient(1100px 460px at 12% -10%, rgba(59,91,219,.32) 0%, rgba(59,91,219,0) 60%),
+    radial-gradient(900px 460px at 92% 0%, rgba(16,152,173,.30) 0%, rgba(16,152,173,0) 55%),
+    #0c0e14;
+  color:#eef1f8;border-top:1px solid #1c2030;border-bottom:1px solid #1c2030;
+}
+section.feature .kicker{color:#9db4ff}
+section.feature h2{color:#fff}
+section.feature p{color:#c3c9d6}
+section.feature .lead{color:#e7ebf4}
+section.feature b{color:#fff}
+.feat-hero{display:grid;grid-template-columns:1.15fr .85fr;gap:34px;align-items:center;margin:8px 0 6px}
+@media(max-width:900px){.feat-hero{grid-template-columns:1fr;gap:22px}}
+.feat-hero h2{text-align:left;margin:0 0 14px}
+.feat-stat{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;padding:30px 24px;text-align:center;backdrop-filter:blur(4px);
+}
+.feat-stat .big{font-family:"Newsreader",serif;font-weight:600;font-size:clamp(54px,9vw,86px);line-height:.95;
+  background:linear-gradient(95deg,#9db4ff,#7fe3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+.feat-stat .lab{color:#c3c9d6;font-size:15px;margin-top:12px;max-width:240px}
+.feat-stat .sub{color:#8b93a6;font-size:13px;margin-top:6px}
+.envchips{display:flex;flex-wrap:wrap;gap:9px;margin:20px 0 4px}
+.envchip{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;
+  padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#dfe4f0}
+.envchip svg{width:15px;height:15px;opacity:.9}
+.feat-grid-wrap{margin:30px 0 6px;position:relative;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.feat-grid-wrap video{display:block;width:100%;height:auto;background:#000}
+.feat-grid-cap{position:absolute;left:0;right:0;bottom:0;padding:30px 22px 16px;
+  background:linear-gradient(to top,rgba(8,10,16,.85),rgba(8,10,16,0));
+  font-size:14.5px;color:#dfe4f0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.feat-grid-cap .chip{background:rgba(157,180,255,.2);color:#cdd9ff}
+.vcard.dark{background:#11141d;border-color:#222838}
+.vcard.dark .cap{color:#c3c9d6}
+footer{padding:42px 0 56px;border-top:1px solid var(--line);background:#fff}
+footer p{text-align:center;color:var(--muted);font-size:14px;margin:6px 0}
+
+.editnote{background:#fff8e6;border:1px solid #f3e2a8;color:#7a5d00;border-radius:10px;padding:10px 16px;font-size:13.5px;max-width:880px;margin:0 auto 18px;text-align:center}
+
+/* ===================================================================
+   OSCAR-inspired refinements (sticky TOC, left-accent headings, etc.)
+   =================================================================== */
+/* Sticky table-of-contents nav */
+.toc-nav{
+  position:sticky;top:0;z-index:60;
+  background:rgba(255,255,255,.82);
+  backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.toc-inner{
+  max-width:var(--maxw);margin:0 auto;padding:.72rem 1.25rem;
+  display:flex;gap:1.4rem;justify-content:center;align-items:center;flex-wrap:wrap;font-size:.86rem;
+}
+.toc-brand{font-family:"Newsreader",serif;font-weight:600;font-size:1.02rem;margin-right:auto;letter-spacing:-.01em}
+.toc-brand b{background:linear-gradient(95deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.toc-inner a:not(.toc-brand){color:var(--muted);font-weight:500;white-space:nowrap;transition:color .15s}
+.toc-inner a:not(.toc-brand):hover{color:var(--accent);text-decoration:none}
+@media(max-width:820px){
+  .toc-inner{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:1.05rem;padding:.6rem 1rem}
+  .toc-inner::-webkit-scrollbar{display:none}
+  .toc-brand{margin-right:1rem}
+}
+
+/* Left-aligned section headings with accent bar (OSCAR signature) */
+section .kicker{text-align:left;margin-left:2px}
+section h2{
+  text-align:left;padding-left:.9rem;position:relative;font-weight:700;
+}
+section h2::before{
+  content:"";position:absolute;left:0;top:.28em;bottom:.28em;width:4px;
+  background:var(--accent);border-radius:2px;
+}
+section.feature h2::before{background:#7fe3ee}
+/* keep prose readable, lightly justified like OSCAR */
+section .narrow p{text-align:justify;text-justify:inter-word}
+/* center alignment helpers for headings that should stay centered */
+section.feature .kicker{margin-left:2px}
+section[id]{scroll-margin-top:70px}
+
+/* Buttons: hover to accent blue (OSCAR behavior) */
+.btn.ghost:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:not(.soon):not(.ghost):hover{background:var(--accent);border-color:var(--accent)}
+
+/* pass / fail badges */
+.badge{display:inline-flex;align-items:center;gap:.4em;font-size:12px;font-weight:700;padding:3px 11px;border-radius:999px;letter-spacing:.01em}
+.badge.pass{background:#dcfce7;color:#15803d}
+.badge.fail{background:#fee2e2;color:#b91c1c}
+
+/* Copy BibTeX */
+.bibtex-tools{display:flex;justify-content:flex-end;margin-top:10px}
+.copy-btn{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  font:inherit;font-size:14px;font-weight:600;color:var(--ink);
+  background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 16px;transition:.15s;
+}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.copy-btn.done{background:#dcfce7;border-color:#86efac;color:#15803d}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(12px);transition:opacity .55s ease,transform .55s ease;will-change:opacity,transform}
+.reveal.is-visible{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+
+<!-- ============ STICKY TOC NAV ============ -->
+<nav class="toc-nav">
+  <div class="toc-inner">
+    <a class="toc-brand" href="#top"><b>RoboWorld</b></a>
+    <a href="#abstract">Abstract</a>
+    <a href="#method">Method</a>
+    <a href="#efficiency">Efficiency</a>
+    <a href="#results">Results</a>
+    <a href="#rollouts">Rollouts</a>
+    <a href="#ablations">Ablations</a>
+    <a href="#synthetic">Environments</a>
+    <a href="#video">Video</a>
+    <a href="#bibtex">BibTeX</a>
+  </div>
+</nav>
+<span id="top"></span>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <div style="text-align:center"><span class="eyebrow">Robot Policy Evaluation · World Models</span></div>
+    <h1 class="title"><span class="brand">RoboWorld</span><br/>Fast and Reliable Neural Simulators<br/>for Generalist Robot Policy Evaluation</h1>
+
+    <p class="authors">
+      Byeongguk&nbsp;Jeon<sup>*</sup>, Seonghyeon&nbsp;Ye<sup>*</sup>, JaeHyeok&nbsp;Doo, Sungdong&nbsp;Kim, Minjoon&nbsp;Seo, Hyungmok&nbsp;Son, Kimin&nbsp;Lee
+    </p>
+    <p class="affil"><sup>*</sup>Equal contribution</p>
+
+    <p class="venue"><span class="pill">ICML 2026 F2S Workshop — Long-Horizon Video Generation</span></p>
+
+
+    <div class="btns">
+      <a class="btn soon">arXiv <span class="tag-soon">coming soon</span></a>
+      <a class="btn soon">Code <span class="tag-soon">coming soon</span></a>
+      <a class="btn" href="#video">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 4 20 12 6 20 6 4"/></svg> Video</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO OVERVIEW (intro) VIDEO ============ -->
+<div class="hero-overview" id="video">
+  <div class="vcard">
+    <video src="static/videos/supplementary.mp4" poster="static/images/supplementary_poster.jpg" controls playsinline preload="metadata"></video>
+    <div class="cap"><span class="chip">Overview</span> A 3-minute introduction to RoboWorld</div>
+  </div>
+</div>
+<p class="hero-divider">RoboWorld vs. the real world</p>
+
+<!-- ============ HERO TEASER VIDEOS (same task, side by side, play once) ============ -->
+<div class="hero-duo">
+  <div class="vcard">
+    <video class="playonce" src="static/videos/hero_pi05_success_freeze.mp4" poster="static/images/hero_pi05_first.jpg" autoplay muted playsinline preload="auto"></video>
+    <div class="cap"><span style="font-weight:600">π₀.₅</span> — RoboWorld (left) vs. Real (right)</div>
+  </div>
+  <div class="vcard">
+    <video class="playonce" src="static/videos/hero_pgfast_fail_freeze.mp4" poster="static/images/hero_pgfast_first.jpg" autoplay muted playsinline preload="auto"></video>
+    <div class="cap"><span style="font-weight:600">PaliGemma&nbsp;Fast</span> — RoboWorld (left) vs. Real (right)</div>
+  </div>
+</div>
+<p class="hero-duo-note"><b>Same task, different outcome.</b> From one shared initial frame, each rollout plays until its result and freezes — π₀.₅ succeeds while PaliGemma&nbsp;Fast fails, and RoboWorld reproduces both, matching the real environment.</p>
+
+<!-- ============ ABSTRACT ============ -->
+<section style="background:#fff" id="abstract">
+  <div class="wrap narrow">
+    <p class="kicker">Abstract</p>
+    <h2>Evaluating robot policies without the robots</h2>
+    <p class="lead">Video world models are emerging as a scalable alternative for evaluating generalist robot policies, bypassing the physical constraints and engineering burden of real-world deployment. Yet evaluation with world models remains hard: model artifacts make long rollouts unreliable, and slow iterative denoising limits throughput.</p>
+    <p>We introduce <b>RoboWorld</b>, an automated evaluation pipeline that pairs a <b>fast autoregressive video world model</b> with a <b>task-progress-aware vision-language model (VLM) judge</b>. To make long-horizon action-conditioned rollouts both fast and reliable, we propose <b>Step Forcing</b>, which combines anchored and one-step self-forwarded contexts to reduce the train–test mismatch while preserving action–observation dynamics. Together, these components let RoboWorld align strongly with real-world robot evaluation across tasks and environments.</p>
+
+    <div class="metrics">
+      <div class="metric"><div class="num">0.989</div><div class="lab">Pearson <i>r</i> vs. RoboArena</div></div>
+      <div class="metric"><div class="num">0.970</div><div class="lab">Spearman <i>ρ</i> vs. RoboArena</div></div>
+      <div class="metric"><div class="num">15.3</div><div class="lab">FPS rollout (4-step)</div></div>
+      <div class="metric"><div class="num">100</div><div class="lab">H100 GPU-hours / benchmark</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTRIBUTIONS ============ -->
+<section>
+  <div class="wrap">
+    <p class="kicker">What's new</p>
+    <h2>Three ingredients</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="n">01</div>
+        <h4>Step Forcing</h4>
+        <p>A training scheme that denoises from one-step self-forwarded priors under the same few-step schedule used at inference, while interleaving data-grounded anchor steps to keep strict action controllability.</p>
+      </div>
+      <div class="card">
+        <div class="n">02</div>
+        <h4>Fast autoregressive world model</h4>
+        <p>A pretrained video diffusion model adapted with frame-causal attention, action cross-attention, and KV-caching — enabling reliable 4-step long-horizon closed-loop rollouts at 15.3 FPS.</p>
+      </div>
+      <div class="card">
+        <div class="n">03</div>
+        <h4>Task-progress VLM judge</h4>
+        <p>A 0–5 rubric that isolates world-model error to the wrist view while scoring real task progress from fixed external views — fairly crediting policies under imperfect rollouts, unlike binary success.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STEP FORCING ============ -->
+<section style="background:#fff" id="method">
+  <div class="wrap">
+    <p class="kicker">Method</p>
+    <h2>Step Forcing</h2>
+    <div class="narrow">
+      <p>Autoregressive world models suffer a <b>train–test context mismatch</b>: training conditions on clean or noised ground-truth contexts (Teacher / Diffusion Forcing), whereas inference conditions on the model's own generations, so errors accumulate. Training directly on self-generated contexts (Self Forcing) fixes drift but is expensive and weakens action following, because the same action is supervised from model-induced rather than data-grounded states.</p>
+      <p><b>Step Forcing</b> trains the model to denoise from a <b>one-step self-forwarded prior</b> under a fixed discrete schedule — aligning training with inference and enabling efficient few-step (e.g. 4-step) denoising — while a probabilistic <b>anchor step</b> falls back to the data-grounded latent to preserve action–observation dynamics.</p>
+    </div>
+    <figure class="fig bordered">
+      <img src="static/images/stepforcing.png" alt="Step Forcing schematic" />
+      <figcaption><b>(a) Diffusion Forcing</b> conditions on noisy ground truth (red). <b>(b) Self Forcing</b> conditions on self-generated context (green) via repeated forward rollouts. <b>(c) Step Forcing</b> conditions on the one-step self-forwarded prior (green) or the anchor step (red), sharing one noise schedule across training and inference.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ BAIR DIAGNOSTIC ============ -->
+<section>
+  <div class="wrap">
+    <p class="kicker">Diagnostic study</p>
+    <h2>Controllability meets long-horizon stability</h2>
+    <div class="narrow">
+      <p>On BAIR Robot Pushing, Step Forcing preserves action controllability while staying visually sharp over the whole horizon — achieving the best SSIM and LPIPS on both in-horizon (ID) and extrapolation (OOD) frames, using only 4 denoising steps where baselines use 8.</p>
+    </div>
+    <figure class="fig bordered">
+      <video class="bair-video" src="static/videos/bair_robot_pushing/clip54_idx112.mp4" poster="static/images/bair_clip54_idx112_poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+      <figcaption><b>Long-horizon action-conditioned rollout on BAIR.</b> Each column is the same action sequence rolled out by a different method, played frame-by-frame. Teacher / Diffusion Forcing drift and blur over time; Resampling and Self Forcing stay plausible but follow actions loosely. Step Forcing (ours) stays aligned and crisp through <i>t</i>=29.</figcaption>
+    </figure>
+    <div class="bair-more">
+      <figure class="fig bordered" style="margin:18px auto">
+        <video class="bair-video" src="static/videos/bair_robot_pushing/clip63_idx66.mp4" poster="static/images/bair_clip63_idx66_poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+      </figure>
+      <figure class="fig bordered" style="margin:18px auto">
+        <video class="bair-video" src="static/videos/bair_robot_pushing/clip05_idx13.mp4" poster="static/images/bair_clip05_idx13_poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+      </figure>
+      <p class="bair-more-cap">Two additional held-out rollouts, same column order: Ground Truth · Teacher Forcing · Diffusion Forcing · Resampling Forcing · Self Forcing · Step Forcing (ours).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EFFICIENCY ============ -->
+<section style="background:#fff" id="efficiency">
+  <div class="wrap">
+    <p class="kicker">Efficiency</p>
+    <h2>Best quality at the highest throughput</h2>
+    <div class="narrow">
+      <p>On long-horizon RoboArena trajectories (300 frames / 20 s), we sweep baseline denoising steps over {50, 32, 16, 8, 4}. Because Step Forcing shares its schedule between training and inference, it runs at its 4-step setting — reaching <b>15.3 FPS</b> versus 5.7 FPS for bidirectional baselines that cannot reuse KV-cache.</p>
+    </div>
+    <figure class="fig bordered">
+      <img src="static/images/efficiency.png" alt="Quality vs FPS" />
+      <figcaption><b>Generation quality (SSIM, LPIPS, FVD) vs. inference FPS.</b> Step Forcing (★) achieves the best LPIPS overall and the best SSIM/FVD among 4-step methods — a substantially better speed–quality tradeoff for large-scale evaluation.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ CORRELATION ============ -->
+<section id="results">
+  <div class="wrap">
+    <p class="kicker">Main result</p>
+    <h2>Strong agreement with real-world evaluation</h2>
+    <div class="narrow">
+      <p>We train the world model on <b>DROID</b> and test it well beyond its training environments by replaying <b>RoboArena</b> evaluation episodes inside RoboWorld — sharing only the initial frame. Across 8 open-sourced policies and 4,186 rollouts, RoboWorld's rankings match the real-world leaderboard with <b>Pearson r = 0.989</b> and <b>Spearman ρ = 0.970</b>, while replicating the benchmark in only ~100 H100 GPU-hours.</p>
+    </div>
+    <figure class="fig bordered">
+      <img src="static/images/correlation.png" alt="Correlation with RoboArena" />
+      <figcaption><b>RoboWorld vs. RoboArena.</b> (left) Predicted scores correlate tightly with the real-world leaderboard. (right) Sharing only the initial view, RoboWorld reproduces both successes (π₀.₅) and policy-specific failures (PaliGemma&nbsp;Fast selecting the wrong object).</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ QUALITATIVE VIDEO GALLERY ============ -->
+<section style="background:#fff" id="rollouts">
+  <div class="wrap">
+    <p class="kicker">Qualitative rollouts</p>
+    <h2>RoboWorld vs. the real world</h2>
+    <div class="narrow">
+      <p>Each clip shows a policy executed in <b>RoboWorld</b> (left) and in the <b>real RoboArena</b> environment (right), starting from the same initial frame. RoboWorld reproduces both successful executions and policy-specific failure modes.</p>
+    </div>
+    <div class="vgrid two">
+      <div class="vcard"><video src="static/videos/compare_pi05.mp4" muted loop playsinline preload="metadata"></video><div class="cap"><span class="chip">π₀.₅</span> <span class="badge pass">✓ Success</span> reproduced in both</div></div>
+
+      <div class="vcard"><video src="static/videos/compare_pi0_droid.mp4" muted loop playsinline preload="metadata"></video><div class="cap"><span class="chip">π₀ (DROID)</span> Generated vs. real closed-loop rollout</div></div>
+      <div class="vcard"><video src="static/videos/compare_paligemma_fast_droid.mp4" muted loop playsinline preload="metadata"></video><div class="cap"><span class="chip alt">PaliGemma Fast</span> <span class="badge fail">✗ Failure</span> reproduced in both</div></div>
+      <div class="vcard"><video src="static/videos/compare_paligemma_binning_droid.mp4" muted loop playsinline preload="metadata"></video><div class="cap"><span class="chip alt">PaliGemma Binning</span> Generated vs. real closed-loop rollout</div></div>
+      <div class="vcard"><video src="static/videos/compare_pi05_example2.mp4" muted loop playsinline preload="metadata"></video><div class="cap"><span class="chip">π₀.₅</span> Additional example</div></div>
+      <div class="vcard"><video src="static/videos/compare_pi0_droid_example2.mp4" muted loop playsinline preload="metadata"></video><div class="cap"><span class="chip">π₀ (DROID)</span> Additional example</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABLATION ============ -->
+<section id="ablations">
+  <div class="wrap">
+    <p class="kicker">Ablations</p>
+    <h2>Both ingredients matter</h2>
+    <div class="narrow">
+      <p>On the challenging, fast-moving wrist view, removing the self-forwarded prior or the anchor step both increase FVD, and dropping schedule alignment hurts most — confirming that aligned few-step denoising plus data-grounded anchors are what keep 4-step autoregressive rollouts stable. Replacing the task-progress rubric with binary success drops Spearman correlation from 0.970 to 0.922.</p>
+    </div>
+    <figure class="fig" style="max-width:680px">
+      <img src="static/images/ablation.png" alt="Component ablation" style="border:1px solid var(--line);border-radius:12px;background:#fff" />
+      <figcaption><b>Component ablation of Step Forcing</b> (wrist-view FVD, lower is better; 4-step rollout).</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ SYNTHETIC / EXTREME ENVIRONMENTS (feature band) ============ -->
+<section class="feature" id="synthetic">
+  <div class="wrap">
+    <p class="kicker">Beyond the lab</p>
+    <div class="feat-hero">
+      <div>
+        <h2>Evaluate anywhere — even places<br/>no robot can safely go</h2>
+        <p class="lead">RoboWorld turns a single real frame into an entire interactive environment. We transform RoboArena scenes into <b>eight extreme settings</b> and run full closed-loop policy evaluation inside them — with <b>no physical access, no simulator engineering, and no asset creation</b>.</p>
+        <div class="envchips">
+          <span class="envchip">✈️ Airplane cabin</span>
+          <span class="envchip">🚀 Spacecraft interior</span>
+          <span class="envchip">🏥 Operating room</span>
+          <span class="envchip">☢️ Nuclear facility</span>
+          <span class="envchip">🌊 Underwater station</span>
+          <span class="envchip">🧯 Disaster site</span>
+          <span class="envchip">🏗️ Construction site</span>
+          <span class="envchip">⛏️ Mine tunnel</span>
+        </div>
+      </div>
+      <div class="feat-stat">
+        <div class="big">0.970</div>
+        <div class="lab">Pearson <i>r</i> with the real-world leaderboard — <b style="color:#fff">retained even in synthetic extreme environments</b></div>
+        <div class="sub">746 valid initial conditions · 175 source frames</div>
+      </div>
+    </div>
+
+    <!-- big montage centerpiece -->
+    <div class="feat-grid-wrap">
+      <video src="static/videos/synthetic_grid9.mp4" poster="static/images/synthetic_grid9_poster.jpg" muted loop playsinline preload="metadata"></video>
+      <div class="feat-grid-cap"><span class="chip">81 rollouts</span> Closed-loop policy evaluation across a wide range of RoboWorld-generated environments, running simultaneously.</div>
+    </div>
+
+    <!-- per-environment multi-view clips -->
+    <div class="vgrid three" style="margin-top:22px">
+      <div class="vcard dark"><video src="static/videos/env_factory.mp4" muted loop playsinline preload="metadata"></video><div class="cap"><span class="chip alt">🏗️ Construction site</span> multi-view closed-loop rollout</div></div>
+      <div class="vcard dark"><video src="static/videos/env_airplane2.mp4" muted loop playsinline preload="metadata"></video><div class="cap"><span class="chip alt">✈️ Airplane cabin</span> alternate task &amp; view</div></div>
+      <div class="vcard dark"><video src="static/videos/env_factory3.mp4" muted loop playsinline preload="metadata"></video><div class="cap"><span class="chip alt">🏭 Industrial workshop</span> multi-view closed-loop rollout</div></div>
+    </div>
+
+    <figure class="fig bordered" style="margin-top:30px">
+      <img src="static/images/extreme.png" alt="Extreme environment rollouts" />
+      <figcaption style="color:#b6bdcc"><b style="color:#dfe4f0">Closed-loop evaluation in synthetic extreme environments</b> (e.g. spacecraft interiors, disaster sites), generated by image editing from real RoboArena initial frames. Task instructions such as “wipe the table” and “remove the bowl from the plate” are executed entirely inside the world model.</figcaption>
+    </figure>
+  </div>
+</section>
+
+
+<!-- ============ BIBTEX ============ -->
+<section style="background:#fff" id="bibtex">
+  <div class="wrap narrow">
+    <p class="kicker">Citation</p>
+    <h2>BibTeX</h2>
+    <div class="bibtex"><pre id="bibtex-src">Citation information will be available soon.</pre></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Byeongguk Jeon<sup>*</sup>, Seonghyeon Ye<sup>*</sup>, JaeHyeok Doo, Sungdong Kim, Minjoon Seo, Hyungmok Son, Kimin Lee &nbsp;·&nbsp; <sup>*</sup>Equal contribution</p>
+    <p>Website for <b>RoboWorld</b>. Page template inspired by the <a href="https://github.com/nerfies/nerfies.github.io" target="_blank" rel="noopener">Nerfies</a> project page. Content © the authors.</p>
+  </div>
+</footer>
+
+<script>
+// Autoplay looping clips only while visible (saves bandwidth, avoids jank)
+const vids = document.querySelectorAll('video[loop]');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    const v = e.target;
+    if(e.isIntersecting){ v.play().catch(()=>{}); }
+    else { v.pause(); }
+  });
+},{threshold:0.25});
+vids.forEach(v=>io.observe(v));
+
+// Play-once hero clips: start when visible, do not loop (freeze on labeled last frame)
+const once = document.querySelectorAll('video.playonce');
+once.forEach(v=>{ v.muted = true; });
+const oio = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting && !e.target.dataset.started){
+      e.target.dataset.started = '1';
+      e.target.play().catch(()=>{});
+    }
+  });
+},{threshold:0.35});
+once.forEach(v=>oio.observe(v));
+// also try immediately in case they are already in view on load
+window.addEventListener('load', ()=>{ once.forEach(v=>{ v.play().catch(()=>{}); }); });
+
+// Scroll reveal
+const revealEls = document.querySelectorAll('.fig, .vcard, .card, .metric, .feat-grid-wrap, .feat-stat, .bibtex, .results-group');
+revealEls.forEach(el=>el.classList.add('reveal'));
+const rio = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-visible'); rio.unobserve(e.target);} });
+},{threshold:0.12});
+revealEls.forEach(el=>rio.observe(el));
+
+// Copy BibTeX
+const cb = document.getElementById('copyBib');
+if(cb){
+  cb.addEventListener('click', async ()=>{
+    const txt = document.getElementById('bibtex-src').innerText;
+    try{ await navigator.clipboard.writeText(txt); }
+    catch(_){ const t=document.createElement('textarea'); t.value=txt; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+    cb.classList.add('done'); cb.querySelector('span').textContent='Copied!';
+    setTimeout(()=>{ cb.classList.remove('done'); cb.querySelector('span').textContent='Copy BibTeX'; }, 1800);
+  });
+}
+</script>
+</body>
+</html>
